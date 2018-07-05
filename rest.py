@@ -51,11 +51,11 @@ def demoRecipe():
     r = recipe('vodka cranberry')
     start = time.time()
 
-    for ingredient,cl in r:
+    for ingredient in r:
             enablePump(ingredient)
 
-    for ingredient,cl in r:
-        if cl <= 0:
+    for ingredient in r:
+        if r[ingredient] <= 0:
             disablePump(ingredient)
 
         time.sleep(0.01)
