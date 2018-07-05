@@ -2,7 +2,7 @@ from flask import Flask, request
 from flask_restful import Resource, Api
 import json
 from json import dumps
-from time import sleep
+from time import sleep, time
 import flask
 import random
 from gpiozero import LED
@@ -49,7 +49,7 @@ def isAvailable():
 
 def demoRecipe():
     r = recipe('vodka cranberry')
-    start = time.time()
+    start = time()
 
     for ingredient in r:
             enablePump(ingredient)
@@ -58,8 +58,8 @@ def demoRecipe():
         if r[ingredient] <= 0:
             disablePump(ingredient)
 
-        time.sleep(0.01)
-        r[ingredient] -= cl_per_sec * (time.time() - start)
+        sleep(0.01)
+        r[ingredient] -= cl_per_sec * (time() - start)
 
 class Switch_On(Resource):
     def get(self):
