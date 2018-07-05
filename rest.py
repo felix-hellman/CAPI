@@ -9,21 +9,35 @@ from gpiozero import LED
 app = Flask(__name__)
 api = Api(app)
 
-pumps = [LED(17),LED(22),LED(27)]
+pump_pins = [LED(17),LED(22),LED(27)]
 status = [0,0,0] 
 
-rate = 0.1
+cl_per_sec = 0.1
 
+def secs_to_pour(cl):
+    return cl / cl_per_sec
 
-def enablePump(number):
+def recipe(drink_name):
+    with open('drinks.json') as drinks_file:
+        drinks = json.load(drinks_file)
+        return drinks[drink_name]
+
+def pump_by_liquid(liquid):
+    with open('pumpsByLiquid.json') as pump_by_liquid_file:
+        pump_by_liquid = json.load(pump_by_liquid_file)
+        return pump_by_liquid[liquid]
+
+def enablePump(liquid):
     global status
-    pumps[number].on()
-    status[number] = 1
+    pump_index = pump_by_liquid(liquid)
+    pump_pins[pump_index].on()
+    status[pump_index] = 1
 
-def disablePump(number):
+def disablePump(liquid):
     global status
-    pumps[number].off()
-    status[number] = 0
+    pump_index = pump_by_liquid(liquid)
+    pump_pins[pump_index].off()
+    status[pump_index] = 0
 
 def isAvailable():
     global status
@@ -33,7 +47,18 @@ def isAvailable():
     return True
 
 def demoRecipe():
-    enablePump(1)
+    r = recipe('vodka cranberry')
+    start = time.time()
+
+    for ingredient,cl in r:
+            enablePump(ingredient)
+
+    for ingredient,cl in r:
+        if cl <= 0:
+            disablePump(ingredient)
+
+        time.sleep(0.01)
+        r[ingredient] -= cl_per_sec * (time.time() - start)
 
 class Switch_On(Resource):
     def get(self):
@@ -69,7 +94,6 @@ class DemoRecipe(Resource):
       else:
          result = {'state':'Busy'}
       return flask.jsonify(result)
-         
 
 api.add_resource(Switch_On, '/on')
 api.add_resource(Switch_Off,'/off')
