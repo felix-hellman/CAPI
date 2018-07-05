@@ -13,12 +13,12 @@ status = [0]
 
 def enablePump(number):
     global status
-    #pumps[number].on()
+    pumps[number].on()
     status[number] = 1
 
 def disablePump(number):
     global status
-    #pumps[number].off()
+    pumps[number].off()
     status[number] = 0
 
 def isAvailable():
