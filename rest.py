@@ -28,6 +28,17 @@ def pump_by_liquid(liquid):
         pump_by_liquid = json.load(pump_by_liquid_file)
         return pump_by_liquid[liquid]
 
+def clear():
+    for i, v in enumerate(pump_pins):
+        v.on()
+        status[i] = 1
+
+    sleep(20)
+
+    for i, v in enumerate(pump_pins):
+        v.off()
+        status[i] = 0
+
 def enablePump(liquid):
     global status
     pump_index = pump_by_liquid(liquid)
@@ -50,16 +61,22 @@ def isAvailable():
 def demoRecipe():
     r = recipe('vodka cranberry')
     start = time()
+    total_time = secs_to_pour(reduce(max, r.values()))
 
     for ingredient in r:
-            enablePump(ingredient)
+        enablePump(ingredient)
+
+    while (time() - start) < total_time:
+        per_tube_cl_poured = cl_per_sec * (time() - start)
+
+        for ingredient in r:
+            if r[ingredient] - per_tube_cl_poured <= 0:
+                disablePump(ingredient)
+
+        sleep(0.2)
 
     for ingredient in r:
-        if r[ingredient] <= 0:
-            disablePump(ingredient)
-
-        sleep(0.01)
-        r[ingredient] -= cl_per_sec * (time() - start)
+        disablePump(ingredient)
 
 class Switch_On(Resource):
     def get(self):
@@ -86,6 +103,11 @@ class GetCurrentStatus(Resource):
       result = {'Available':isAvailable()}
       return flask.jsonify(result)
 
+class Clear(Resource):
+    def get(self):
+        clear()
+        return "Clearing!"
+
 class DemoRecipe(Resource):
    def get(self):
       result = ""
@@ -99,6 +121,7 @@ class DemoRecipe(Resource):
 api.add_resource(Switch_On, '/on')
 api.add_resource(Switch_Off,'/off')
 api.add_resource(GetCurrentStatus,'/status')
+api.add_resource(Clear,'/clear')
 api.add_resource(DemoRecipe,'/demo')
 
 if __name__ == '__main__':
