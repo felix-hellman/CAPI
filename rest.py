@@ -4,12 +4,16 @@ from json import dumps
 from time import sleep
 import flask
 import random
+from gpiozero import LED
 
 app = Flask(__name__)
 api = Api(app)
 
-#pumps = [LED(17),LED(27),LED(22)]
-status = [0] 
+pumps = [LED(17),LED(22),LED(27)]
+status = [0,0,0] 
+
+rate = 0.1
+
 
 def enablePump(number):
     global status
@@ -29,9 +33,7 @@ def isAvailable():
     return True
 
 def demoRecipe():
-    enablePump(0)
-    sleep(15)
-    disablePump(0)   
+    enablePump(1)
 
 class Switch_On(Resource):
     def get(self):
@@ -39,6 +41,8 @@ class Switch_On(Resource):
         if isAvailable():
             result = {'state':'Starting'}
             enablePump(0)
+            enablePump(1)
+            enablePump(2)
         else:
             result = {'state':'Busy'}
         return flask.jsonify(result)
@@ -47,6 +51,8 @@ class Switch_Off(Resource):
     def get(self):
         result = {'state':'Stopping'}
         disablePump(0)
+        disablePump(1)
+        disablePump(2)
         return flask.jsonify(result)
 
 class GetCurrentStatus(Resource):
