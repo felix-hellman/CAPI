@@ -38,7 +38,7 @@ class Switch_On(Resource):
         result = ""
         if isAvailable():
             result = {'state':'Starting'}
-            wnablePump(0)
+            enablePump(0)
         else:
             result = {'state':'Busy'}
         return flask.jsonify(result)
