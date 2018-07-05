@@ -8,7 +8,7 @@ import random
 app = Flask(__name__)
 api = Api(app)
 
-#pumps = [LED(17)]
+#pumps = [LED(17),LED(27),LED(22)]
 status = [0] 
 
 def enablePump(number):
@@ -46,7 +46,7 @@ class Switch_On(Resource):
 class Switch_Off(Resource):
     def get(self):
         result = {'state':'Stopping'}
-        sisablePump(0)
+        disablePump(0)
         return flask.jsonify(result)
 
 class GetCurrentStatus(Resource):
